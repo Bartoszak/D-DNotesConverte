@@ -5,6 +5,7 @@ import codecs
 import re
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from printTree import *
 
 from typing import List
 
@@ -19,8 +20,15 @@ def get_node_info(txt):
         txt = match.string[match.end()::]
         number = match.group().replace('.', '')
         counter += 1
-        numbers.append(number)
+        numbers.append(int(number))
     return counter, numbers, txt
+
+def find_id(l):
+    result = 0
+    for n in l:
+        result = result * 100
+        result += n
+    return result
 
 def linesToTree(lines: List[str]):
     G = nx.DiGraph()
@@ -35,7 +43,7 @@ def linesToTree(lines: List[str]):
     for line in lines:
         if re.search("^\d", line):
             counter, numbers, txt = get_node_info(line)
-            id = int(''.join(numbers))
+            id = find_id(numbers)
             lvl = counter
             current_node = id
             G.add_node(id)
@@ -44,7 +52,7 @@ def linesToTree(lines: List[str]):
             G.nodes[id]['title'] = txt
             G.nodes[id]['content'] = ''
             if len(numbers) > 1:
-                G.add_edge(int(''.join(numbers[:len(numbers) - 1:])), id)
+                G.add_edge(find_id(numbers[:len(numbers) - 1:]), id)
             else:
                 G.add_edge(0, id)
         else:
@@ -57,8 +65,7 @@ def linesToTree(lines: List[str]):
     # for i in range(len(all_lines)):
     #     id = int(''.join(all_numbers[i]))
     #     G.add_node(id)
-    #     G.nodes[id]['lvl'] = all_counters[i]
-    #     G.nodes[id]['parents'] = all_numbers[i]
+    #     G.nodes[id]['lvl'] = all_counters[i]    #     G.nodes[id]['parents'] = all_numbers[i]
     #     G.nodes[id]['txt'] = all_lines[i]
     #     if len(all_numbers[i]) > 1:
     #         G.add_edge(id, int(''.join(all_numbers[i][:len(all_numbers[i]) - 1:])))
@@ -66,11 +73,15 @@ def linesToTree(lines: List[str]):
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
     nx.draw(G)
     plt.show()
-    print([G.nodes[n]['title'] for n in G.neighbors(1)])
+    # print([G.nodes[n]['title'] for n in G.neighbors(1)])
+    for line in print_as_tree(G, 0):
+        print(line)
+
 def main():
     filename = askopenfilename(initialdir=r'C:\Users\qwerty\Desktop\Bartosz Wolak\D&D\DM')
     with codecs.open(filename, 'r', 'utf-8') as f:
         linesToTree(f.read().replace('\r','').split('\n'))
+    # print(find_id([1, 2, 1]))
 
 
 
